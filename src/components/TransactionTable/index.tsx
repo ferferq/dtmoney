@@ -1,25 +1,9 @@
-import { useEffect, useState } from "react";
-import { api } from "../../services/api";
+
+import { useTransactions } from "../../hooks/UseTransactionContext";
 import { Container } from "./styles";
 
-interface TransactionsProps {
-  id: number,
-  title: string,
-  type: string,
-  category: string,
-  amount: number,
-  createdAt: string
-}
-
 export function TransactionTable () {
-  const [transactions, setTransactions] = useState<TransactionsProps[]>([]);
-
-  useEffect(() => {
-    api.get('transactions')
-    .then((response) => {//setTransactions(response.data)
-      setTransactions(response.data.transactions);
-    });
-  }, []);
+  const { transactions } = useTransactions();
 
   return (
     <Container>
@@ -40,6 +24,8 @@ export function TransactionTable () {
                 <tr key={transaction.id}>
                   <td>{transaction.title}</td>
                   <td className={transaction.type}>{
+                    transaction.type === 'deposit' ? '' : '-'
+                  }{
                     new Intl.NumberFormat('pt-BR', {
                       style: 'currency',
                       currency: 'BRL'

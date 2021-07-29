@@ -1,12 +1,15 @@
 //bibliotecas
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import Modal from 'react-modal';
 
 //images
 import closeImg from '../../assets/close.svg';
 import incomeImg from '../../assets/income.svg';
 import outcomeImg from '../../assets/outcome.svg';
-import { api } from '../../services/api';
+import { useTransactions } from '../../hooks/UseTransactionContext';
+import { toast } from 'react-toastify';
+
+import * as yup from 'yup';
 
 //styles
 import { Container, RadioBox, TransactionTypeContainer } from './styles';
@@ -18,22 +21,69 @@ interface NewTransactionModalProps {
   onRequestClose: () => void;
 }
 
+type NewTransactionFormData = {
+  titulo?: string;
+  category?: string;
+};
+
+const createUserFormScrema = yup.object().shape({
+  titulo: yup.string().required('Titulo obrigatório'),
+  category: yup.string().required('Categoria obrigatória'),
+})
+
 export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionModalProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [title, setTitle] = useState('');
   const [value, setValue] = useState(0);
   const [category, setCategory] = useState('');
   const [type, setType] = useState('deposit');
+  const {createTransaction} = useTransactions();
 
-  function handleCreateNewTransaction(event: FormEvent) {
-    event.preventDefault();
-    const data = {
-      title,
-      value, 
-      category, 
-      type
+  function getValid(err: yup.ValidationError) {
+    const newMessageError = [''];
+
+     err.inner.forEach(erro => {
+      if (erro.path)
+      newMessageError.push(erro.message)
+    })
+      return newMessageError;
     }
 
-    api.post('transactions', data);
+  async function checkerror (data:NewTransactionFormData) {
+    await createUserFormScrema.validate(data, {
+      abortEarly: false,
+    });
+  }
+
+  async function handleCreateNewTransaction(event: FormEvent) {
+    event.preventDefault();
+    try{
+
+      await checkerror({titulo: title, category: category});
+
+      await createTransaction({
+        title,
+        amount:value, 
+        category, 
+        type, 
+        createdAt: String(new Date()),
+      });
+      setTitle('');
+      setValue(0);
+      setCategory('');
+      setType('deposit');
+      onRequestClose();
+
+    }catch( error) {
+      if (error instanceof yup.ValidationError) {
+        const messageError = getValid(error)
+        messageError.filter(message => {
+          if (message)
+          toast.error(message);
+          return message;
+        })
+      }
+    }
   }
 
   return (
@@ -50,7 +100,7 @@ export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionMo
         <img src={closeImg} alt="Fechar" />
       </button>
 
-      <Container onSubmit={handleCreateNewTransaction}>
+      <Container ref={formRef} onSubmit={handleCreateNewTransaction}>
         <h2>Cadastrar transação</h2>
 
         <input

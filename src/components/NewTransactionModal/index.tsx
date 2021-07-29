@@ -40,13 +40,15 @@ export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionMo
   const {createTransaction} = useTransactions();
 
   function getValid(err: yup.ValidationError) {
-    const newMessageError = [''];
+    const errors:string[] = [];
 
      err.inner.forEach(erro => {
-      if (erro.path)
-      newMessageError.push(erro.message)
+      if (erro.path && erro.message){
+        errors.push(erro.message)
+      }
     })
-      return newMessageError;
+
+      return errors;
     }
 
   async function checkerror (data:NewTransactionFormData) {
@@ -77,6 +79,7 @@ export function NewTransactionModal({ isOpen, onRequestClose }: NewTransactionMo
     }catch( error) {
       if (error instanceof yup.ValidationError) {
         const messageError = getValid(error)
+        console.log(messageError);
         messageError.filter(message => {
           if (message)
           toast.error(message);

@@ -2,7 +2,7 @@
 ### DtMoney é um projeto desenvolvido no curso do Ignite - Rocketseat - Desenvolvido em ReactJS
 </p>
 <p align="center">
-Um plataforma de controle de custos. 
+Uma plataforma de controle de custos. 
 </p>
 
 <h1 align="center">
@@ -15,10 +15,10 @@ Um plataforma de controle de custos.
 
 - [React](https://reactjs.org)
 - [TypeScript](https://www.typescriptlang.org/)
-- 
-- Hooks
-- Context
-- Sass
+- [MirajeJS](https://miragejs.com/)
+- [React-toastify](https://www.npmjs.com/package/react-toastify)
+- [Styled-components](https://styled-components.com/)
+- [Yup](https://www.npmjs.com/package/yup)
 
 ---
 
